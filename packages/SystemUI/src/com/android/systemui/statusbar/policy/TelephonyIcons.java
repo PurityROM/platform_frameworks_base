@@ -136,6 +136,4 @@ class TelephonyIcons {
               R.drawable.stat_sys_data_fully_connected_4g }
         };
 
-
 }
-
