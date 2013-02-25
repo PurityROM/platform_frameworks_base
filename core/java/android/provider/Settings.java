@@ -2822,14 +2822,17 @@ public final class Settings {
         public static final String VOLUME_KEYS_CONTROL_RING_STREAM = "volume_keys_control_ring_stream";
 
         /**
+         * Whether electronic beam animation is enabled or not
          * @hide
          */
         public static final String SYSTEM_POWER_ENABLE_CRT_OFF = "system_power_enable_crt_off";
 
         /**
+         * Electronic beam animation mode
+         * 0 = always horizontal, 1 = always vertical, 2 = dependent on orientation
          * @hide
          */
-        public static final String SYSTEM_POWER_ENABLE_CRT_ON = "system_power_enable_crt_on";
+        public static final String SYSTEM_POWER_CRT_MODE = "system_power_crt_mode";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
