@@ -172,6 +172,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mIconHPadding = -1;
     Display mDisplay;
     Point mCurrentDisplaySize = new Point();
+    int mCurrUiInvertedMode;
 
     IDreamManager mDreamManager;
 
@@ -375,6 +376,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
 
+        mCurrUiInvertedMode = mContext.getResources().getConfiguration().uiInvertedMode;
+
         super.start(); // calls createAndAddWindows()
 
         addNavigationBar();
@@ -495,6 +498,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mDateView = (DateView)mStatusBarWindow.findViewById(R.id.date);
 
         mHasSettingsPanel = res.getBoolean(R.bool.config_hasSettingsPanel);
+
         mHasFlipSettings = res.getBoolean(R.bool.config_hasFlipSettingsPanel);
 
         mDateTimeView = mNotificationPanelHeader.findViewById(R.id.datetime);
@@ -2541,6 +2545,10 @@ public class PhoneStatusBar extends BaseStatusBar {
     void updateResources() {
         final Context context = mContext;
         final Resources res = context.getResources();
+
+        // detect inverted ui mode change
+        int uiInvertedMode =
+            mContext.getResources().getConfiguration().uiInvertedMode;
 
         if (mClearButton instanceof TextView) {
             ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
