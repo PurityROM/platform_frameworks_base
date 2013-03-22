@@ -23,6 +23,7 @@ import static com.android.internal.util.cm.QSConstants.TILE_BATTERY;
 import static com.android.internal.util.cm.QSConstants.TILE_BLUETOOTH;
 import static com.android.internal.util.cm.QSConstants.TILE_BRIGHTNESS;
 import static com.android.internal.util.cm.QSConstants.TILE_DELIMITER;
+import static com.android.internal.util.cm.QSConstants.TILE_EXPANDEDDESKTOP;
 import static com.android.internal.util.cm.QSConstants.TILE_GPS;
 import static com.android.internal.util.cm.QSConstants.TILE_LOCKSCREEN;
 import static com.android.internal.util.cm.QSConstants.TILE_LTE;
@@ -43,9 +44,10 @@ import static com.android.internal.util.cm.QSConstants.TILE_WIFIAP;
 import static com.android.internal.util.cm.QSConstants.TILE_WIMAX;
 import static com.android.internal.util.cm.QSUtils.deviceSupportsBluetooth;
 import static com.android.internal.util.cm.QSUtils.deviceSupportsImeSwitcher;
+import static com.android.internal.util.cm.QSUtils.deviceSupportsLte;
 import static com.android.internal.util.cm.QSUtils.deviceSupportsTelephony;
 import static com.android.internal.util.cm.QSUtils.deviceSupportsUsbTether;
-import static com.android.internal.util.cm.QSUtils.deviceSupportsLte;
+import static com.android.internal.util.cm.QSUtils.expandedDesktopEnabled;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -55,6 +57,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -67,6 +70,7 @@ import com.android.systemui.quicksettings.BatteryTile;
 import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
+import com.android.systemui.quicksettings.ExpandedDesktopTile;
 import com.android.systemui.quicksettings.GPSTile;
 import com.android.systemui.quicksettings.InputMethodTile;
 import com.android.systemui.quicksettings.LteTile;
@@ -91,6 +95,7 @@ import com.android.systemui.quicksettings.WifiAPTile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class QuickSettingsController {
     private static String TAG = "QuickSettingsController";
@@ -101,6 +106,9 @@ public class QuickSettingsController {
         = new HashMap<String, ArrayList<QuickSettingsTile>>();
     public HashMap<Uri, ArrayList<QuickSettingsTile>> mObserverMap
         = new HashMap<Uri, ArrayList<QuickSettingsTile>>();
+
+    // Uris that need to be monitored for updating tile status
+    private HashSet<Uri> mTileStatusUris = new HashSet<Uri>();
 
     private final Context mContext;
     private ArrayList<QuickSettingsTile> mQuickSettingsTiles;
@@ -113,10 +121,23 @@ public class QuickSettingsController {
 
     private InputMethodTile mIMETile;
 
+    private static final int MSG_UPDATE_TILES = 1000;
+
     public QuickSettingsController(Context context, QuickSettingsContainerView container, PhoneStatusBar statusBarService) {
         mContext = context;
         mContainerView = container;
-        mHandler = new Handler();
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+
+                switch (msg.what) {
+                    case MSG_UPDATE_TILES:
+                        setupQuickSettings();
+                        break;
+                }
+            }
+        };
         mStatusBarService = statusBarService;
         mQuickSettingsTiles = new ArrayList<QuickSettingsTile>();
     }
@@ -169,7 +190,7 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_GPS)) {
                 qs = new GPSTile(mContext, inflater, mContainerView, this);
             } else if (tile.equals(TILE_BLUETOOTH) && bluetoothSupported) {
-                    qs = new BluetoothTile(mContext, inflater, mContainerView, this);
+                qs = new BluetoothTile(mContext, inflater, mContainerView, this);
             } else if (tile.equals(TILE_BRIGHTNESS)) {
                 qs = new BrightnessTile(mContext, inflater, mContainerView, this, mHandler);
             } else if (tile.equals(TILE_RINGER)) {
@@ -206,7 +227,13 @@ public class QuickSettingsController {
                 qs = new QuietHoursTile(mContext, inflater, mContainerView, this);
             } else if (tile.equals(TILE_VOLUME)) {
                 qs = new VolumeTile(mContext, inflater, mContainerView, this, mHandler);
+            } else if (tile.equals(TILE_EXPANDEDDESKTOP)) {
+                mTileStatusUris.add(Settings.System.getUriFor(Settings.System.EXPANDED_DESKTOP_STYLE));
+                if (expandedDesktopEnabled(resolver)) {
+                    qs = new ExpandedDesktopTile(mContext, inflater, mContainerView, this, mHandler);
+                }
             }
+
             if (qs != null) {
                 qs.setupQuickSettingsTile();
                 mQuickSettingsTiles.add(qs);
@@ -259,6 +286,7 @@ public class QuickSettingsController {
         }
         mObserver = new QuickSettingsObserver(mHandler);
         mObserverMap.clear();
+        mTileStatusUris.clear();
         loadTiles();
         setupBroadcastReceiver();
         setupContentObserver();
@@ -267,6 +295,9 @@ public class QuickSettingsController {
     void setupContentObserver() {
         ContentResolver resolver = mContext.getContentResolver();
         for (Uri uri : mObserverMap.keySet()) {
+            resolver.registerContentObserver(uri, false, mObserver);
+        }
+        for (Uri uri : mTileStatusUris) {
             resolver.registerContentObserver(uri, false, mObserver);
         }
     }
@@ -278,9 +309,14 @@ public class QuickSettingsController {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            ContentResolver resolver = mContext.getContentResolver();
-            for (QuickSettingsTile tile : mObserverMap.get(uri)) {
-                tile.onChangeUri(resolver, uri);
+            if (mTileStatusUris.contains(uri)) {
+                mHandler.removeMessages(MSG_UPDATE_TILES);
+                mHandler.sendEmptyMessage(MSG_UPDATE_TILES);
+            } else {
+                ContentResolver resolver = mContext.getContentResolver();
+                for (QuickSettingsTile tile : mObserverMap.get(uri)) {
+                    tile.onChangeUri(resolver, uri);
+                }
             }
         }
     }
