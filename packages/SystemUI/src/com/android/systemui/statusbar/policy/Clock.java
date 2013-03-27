@@ -50,13 +50,13 @@ import com.android.internal.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import com.android.internal.R;
 
 /**
- * This widget display an analogic clock with two hands for hours and
- * minutes.
+ * Digital clock for the status bar.
  */
 public class Clock extends TextView implements OnClickListener {
     private boolean mAttached;
@@ -65,13 +65,13 @@ public class Clock extends TextView implements OnClickListener {
     private static String mExpandedClockFormatString;
     private static SimpleDateFormat mClockFormat;
     private static SimpleDateFormat mExpandedClockFormat;
+    private Locale mLocale;
 
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
     private static final int AM_PM_STYLE_GONE    = 2;
     private static final int PROTEKK_O_CLOCK     = 3;
     private static int AM_PM_STYLE = AM_PM_STYLE_GONE;
-
 
     private static final char MAGIC1 = '\uEF00';
     private static final char MAGIC2 = '\uEF01';
@@ -115,11 +115,11 @@ public class Clock extends TextView implements OnClickListener {
 
     public Clock(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    
+
         if(isClickable()){
-	            setOnClickListener(this);
-	    }
-	 }
+              setOnClickListener(this);
+      }
+   }
 
     @Override
     protected void onAttachedToWindow() {
@@ -133,6 +133,7 @@ public class Clock extends TextView implements OnClickListener {
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+            filter.addAction(Intent.ACTION_USER_SWITCHED);
 
             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
         }
@@ -169,6 +170,12 @@ public class Clock extends TextView implements OnClickListener {
                 if (mClockFormat != null) {
                     mClockFormat.setTimeZone(mCalendar.getTimeZone());
                 }
+            } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                final Locale newLocale = getResources().getConfiguration().locale;
+                if (! newLocale.equals(mLocale)) {
+                    mLocale = newLocale;
+                    mClockFormatString = ""; // force refresh
+                }
             }
             updateClock();
         }
@@ -189,7 +196,7 @@ public class Clock extends TextView implements OnClickListener {
         } else {
             res = R.string.twelve_hour_time_format;
         }
-        
+
         String format = context.getString(res);
         SimpleDateFormat sdf = updateFormatString(IsShade(), format);
 
@@ -312,22 +319,22 @@ public class Clock extends TextView implements OnClickListener {
 	        StatusBarManager statusBarManager = (StatusBarManager) getContext().getSystemService(
 	                Context.STATUS_BAR_SERVICE);
 	        statusBarManager.collapsePanels();
-	
+
 	        // dismiss keyguard in case it was active and no passcode set
 	        try {
 	            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
 	        } catch (Exception ex) {
 	            // no action needed here
 	        }
-	
+
 	        // start activity
 	        what.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	        mContext.startActivity(what);
 	    }
-	
+
 	    @Override
 	    public void onClick(View v) {
-	        // start com.android.deskclock/.DeskClock
+          // start com.android.deskclock/.DeskClock
         ComponentName clock = new ComponentName("com.android.deskclock",
                 "com.android.deskclock.DeskClock");
         Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
