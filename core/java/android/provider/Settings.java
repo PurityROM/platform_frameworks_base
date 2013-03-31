@@ -2713,13 +2713,6 @@ public final class Settings {
         public static final String WIDGET_BUTTONS_TABLET = "expanded_widget_buttons_tablet";
 
         /**
-         * Navigation controls to Use
-         *
-         * @hide
-         */
-        public static final String NAV_BUTTONS = "nav_buttons";
-
-        /**
         * Notification Power Widget - Custom Brightness Mode
         * @hide
         */
