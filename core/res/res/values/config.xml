@@ -1029,4 +1029,7 @@
 
     <!-- Disable the home key unlock setting --> 
     <bool name="config_disableHomeUnlockSetting">true</bool> 
+
+    <!-- True if the Sym key should open the InputMethodPicker (default) -->
+    <bool name="config_symKeyShowsImePicker">true</bool>
 </resources>
