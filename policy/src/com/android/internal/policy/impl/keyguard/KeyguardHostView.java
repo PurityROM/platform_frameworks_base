@@ -110,7 +110,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     // User for whom this host view was created
     private int mUserId;
 
-     /*package*/ interface TransportCallback {
+    /*package*/ interface TransportCallback {
         void onListenerDetached();
         void onListenerAttached();
         void onPlayStateChanged();
@@ -294,11 +294,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         showPrimarySecurityScreen(false);
         updateSecurityViews();
-        minimizeChallengeIfDesired();
-    }
 
-    private boolean shouldEnableAddWidget() {
-        return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
+        minimizeChallengeIfDesired();
     }
 
     private void updateBackground() {
@@ -325,6 +322,10 @@ public class KeyguardHostView extends KeyguardViewBase {
             // Do nothing here
             }
         }
+    }
+
+    private boolean shouldEnableAddWidget() {
+        return numWidgets() < MAX_WIDGETS && mUserSetupCompleted;
     }
 
     private int getDisabledFeatures(DevicePolicyManager dpm) {
@@ -949,6 +950,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (DEBUG) Log.d(TAG, "show()");
         showPrimarySecurityScreen(false);
     }
+
 
     @Override
     public void wakeWhenReadyTq(int keyCode) {
