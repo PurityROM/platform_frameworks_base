@@ -105,7 +105,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     private static final int SHORT_DELAY = 2000; // 2 seconds
 
     private static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
-    private static final int VIBRATE_PATTERN_MAXLEN = 8 * 2 + 1; // up to eight bumps
 
     private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
     private static final boolean SCORE_ONGOING_HIGHER = false;
@@ -134,9 +133,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     private int mDefaultNotificationColor;
     private int mDefaultNotificationLedOn;
     private int mDefaultNotificationLedOff;
-
-    private long[] mDefaultVibrationPattern;
-    private long[] mFallbackVibrationPattern;
 
     private boolean mSystemReady;
     private int mDisabledNotifications;
@@ -544,7 +540,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
             boolean queryRestart = false;
             boolean packageChanged = false;
-
+            
             if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || (packageChanged=action.equals(Intent.ACTION_PACKAGE_CHANGED))
@@ -706,19 +702,6 @@ public class NotificationManagerService extends INotificationManager.Stub
             mQuietHoursDim = Settings.System.getIntForUser(resolver,
                     Settings.System.QUIET_HOURS_DIM, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
         }
-    }
-
-    static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
-        int[] ar = r.getIntArray(resid);
-        if (ar == null) {
-            return def;
-        }
-        final int len = ar.length > maxlen ? maxlen : ar.length;
-        long[] out = new long[len];
-        for (int i=0; i<len; i++) {
-            out[i] = ar[i];
-        }
-        return out;
     }
 
     NotificationManagerService(Context context, StatusBarManagerService statusBar,
@@ -1213,7 +1196,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 Uri soundUri = null;
                 boolean hasValidSound = false;
 
-                if (!(inQuietHours && mQuietHoursMute) && useDefaultSound) {
+                if (useDefaultSound) {
                     soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
 
                     // check to see if the default notification sound is silent
@@ -1252,40 +1235,25 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
 
                 // vibrate
-                // Does the notification want to specify its own vibration?
-                final boolean hasCustomVibrate = notification.vibrate != null;
-
                 // new in 4.2: if there was supposed to be a sound and we're in vibrate mode,
-                // and no other vibration is specified, we fall back to vibration
+                // we always vibrate, even if no vibration was specified
                 final boolean convertSoundToVibration =
-                           !hasCustomVibrate
+                           notification.vibrate == null
                         && hasValidSound
                         && shouldConvertSoundToVibration()
                         && (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
 
-                // The DEFAULT_VIBRATE flag trumps any custom vibration AND the fallback.
                 final boolean useDefaultVibrate =
-                        (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
+                    (notification.defaults & Notification.DEFAULT_VIBRATE) != 0
+                    || convertSoundToVibration;
                 if (!(inQuietHours && mQuietHoursStill)
-                        && (useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
+                        && (useDefaultVibrate || notification.vibrate != null)
                         && !(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)) {
                     mVibrateNotification = r;
-                    if (useDefaultVibrate || convertSoundToVibration) {
-                        // Escalate privileges so we can use the vibrator even if the notifying app
-                        // does not have the VIBRATE permission.
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mVibrator.vibrate(useDefaultVibrate ? mDefaultVibrationPattern
-                                                                : mFallbackVibrationPattern,
-                                ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } else if (notification.vibrate.length > 1) {
-                        // If you want your own vibration pattern, you need the VIBRATE permission
-                        mVibrator.vibrate(notification.vibrate,
-                            ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
-                    }
+
+                    mVibrator.vibrate(useDefaultVibrate ? DEFAULT_VIBRATE_PATTERN
+                                                        : notification.vibrate,
+                              ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
                 }
             }
 
