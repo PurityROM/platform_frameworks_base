@@ -66,6 +66,7 @@ public class Clock extends TextView implements OnClickListener {
     private static SimpleDateFormat mClockFormat;
     private static SimpleDateFormat mExpandedClockFormat;
     private Locale mLocale;
+    private SettingsObserver mObserver;
 
     private static final int AM_PM_STYLE_NORMAL  = 0;
     private static final int AM_PM_STYLE_SMALL   = 1;
@@ -98,6 +99,10 @@ public class Clock extends TextView implements OnClickListener {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_CLOCK), false, this);
             updateSettings();
+        }
+
+        void unobserve() {
+            mContext.getContentResolver().unregisterContentObserver(this);
         }
 
         @Override public void onChange(boolean selfChange) {
