@@ -3097,11 +3097,6 @@ public final class Settings {
         /** 
          * @hide 
          */ 
-        public static final String NAVIGATION_CONTROLS = "navigation_controls"; 
-
-        /** 
-         * @hide 
-         */ 
         public static final String NAVIGATION_BUTTON_COLOR = "navigation_button_color";
 
         /**
