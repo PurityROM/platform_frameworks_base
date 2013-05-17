@@ -159,8 +159,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     // Pie Control
     protected PieController mPieController;
 
-    };
-
     // UI-specific methods
 
     /**
@@ -1234,4 +1232,24 @@ public abstract class BaseStatusBar extends SystemUI implements
             mPieController.updatePieTriggerMask(newMask);
         }
     }
+
+    private static class SettingsObserver extends ContentObserver {
+        private Handler mHandler;
+
+        SettingsObserver(Handler handler) {
+            super(handler);
+            mHandler = handler;
+        }
+
+        void observe(Context context) {
+            ContentResolver resolver = context.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PIE_COLOR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PIE_SELECTED_COLOR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PIE_OUTLINE_COLOR), false, this);
+        }
+    }
+
 }
