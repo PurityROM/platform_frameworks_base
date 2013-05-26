@@ -3114,6 +3114,13 @@ public final class Settings {
          * @hide
          */
         public static final String NAVIGATION_BUTTON_GLOW_COLOR = "navigation_button_glow_color";
+        
+        /**
+         * Volume key controls ringtone or media sound stream
+         *
+         * @hide
+         */
+        public static final String VOLUME_KEYS_CONTROL_RING_STREAM = "volume_keys_control_ring_stream";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
