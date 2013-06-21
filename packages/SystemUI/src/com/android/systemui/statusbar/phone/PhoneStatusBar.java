@@ -1587,7 +1587,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNotificationPanel.expand();
         if (mHasFlipSettings && mScrollView.getVisibility() != View.VISIBLE) {
-            if (mNotificationIcons.getChildCount() < 1) {
+            if (mNotificationIcons.getChildCount() < 1 && Settings.System.getInt(mContext.getContentResolver(), Settings.System.QS_AUTO_DEFAULT, 0) == 1) {
                 switchToSettings();
             } else {
                 flipToNotifications();
