@@ -21,6 +21,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
@@ -158,7 +159,7 @@ public class PhoneStatusBarView extends PanelBar {
         }
         mFadingPanel = panel;
 		
-        if (mFullWidthNotifications && mBar.mNotificationIcons.getChildCount() < 1) {
+        if (mFullWidthNotifications && mBar.mNotificationIcons.getChildCount() < 1 && Settings.System.getInt(getContext().getContentResolver(), Settings.System.QS_AUTO_DEFAULT, 0) == 1) {
             mBar.switchToSettings();
         }
     }
