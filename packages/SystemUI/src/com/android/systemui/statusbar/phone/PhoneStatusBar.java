@@ -191,7 +191,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     // left-hand icons
     LinearLayout mStatusIcons;
     // the icons themselves
-    IconMerger mNotificationIcons;
+    public IconMerger mNotificationIcons;
     // [+>
     View mMoreIcon;
     LinearLayout mCenterClockLayout;
@@ -1587,7 +1587,11 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNotificationPanel.expand();
         if (mHasFlipSettings && mScrollView.getVisibility() != View.VISIBLE) {
-            flipToNotifications();
+			if (mNotificationIcons.getChildCount() < 1) {
+				switchToSettings();
+			} else {          
+				flipToNotifications();
+			}
         }
 
         if (false) postStartTracing();

@@ -157,6 +157,10 @@ public class PhoneStatusBarView extends PanelBar {
             Slog.v(TAG, "start opening: " + panel + " shouldfade=" + mShouldFade);
         }
         mFadingPanel = panel;
+		
+		if (mFullWidthNotifications && mBar.mNotificationIcons.getChildCount() < 1) {
+            mBar.switchToSettings();
+        }
     }
 
     @Override
