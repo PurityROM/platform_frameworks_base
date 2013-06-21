@@ -158,7 +158,7 @@ public class PhoneStatusBarView extends PanelBar {
         }
         mFadingPanel = panel;
 		
-		if (mFullWidthNotifications && mBar.mNotificationIcons.getChildCount() < 1) {
+        if (mFullWidthNotifications && mBar.mNotificationIcons.getChildCount() < 1) {
             mBar.switchToSettings();
         }
     }
