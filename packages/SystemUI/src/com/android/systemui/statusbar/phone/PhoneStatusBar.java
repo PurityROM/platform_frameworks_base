@@ -1596,6 +1596,25 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (false) postStartTracing();
     }
+    
+    public void forceExpandNotificationsPanel() {
+        if (SPEW) Slog.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
+        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+            return ;
+        }
+        // don't allow expanding via e.g. service call while status bar is hidden
+        // due to expanded desktop
+        if (getExpandedDesktopMode() == 2) {
+            return;
+        }
+
+        mNotificationPanel.expand();
+        if (mHasFlipSettings && mScrollView.getVisibility() != View.VISIBLE) {
+            flipToNotifications();
+        }
+
+        if (false) postStartTracing();
+    }
 
     public void flipToNotifications() {
         if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
@@ -2599,7 +2618,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private final View.OnClickListener mNotificationButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            animateExpandNotificationsPanel();
+            forceExpandNotificationsPanel();
         }
     };
 

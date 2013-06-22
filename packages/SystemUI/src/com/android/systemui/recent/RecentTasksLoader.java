@@ -51,7 +51,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
     private static final int DISPLAY_TASKS = 20;
     private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
-    private static final int DISPLAY_TASKS_LIMITED = 6;
+    private static final int DISPLAY_TASKS_LIMITED = 7;
     
     private Context mContext;
     private RecentsPanelView mRecentsPanel;
