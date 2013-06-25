@@ -2826,9 +2826,8 @@ public final class Settings {
         * @hide
         */
         public static final String COMBINED_BAR_AUTO_HIDE = "combined_bar_auto_hide";
-        
+
         public static final String QS_AUTO_DEFAULT = "qs_auto_default";
-        public static final String RECENTS_TASKS_LIMIT = "recents_tasks_limit";
 
         /**
          * Display style of the status bar battery information

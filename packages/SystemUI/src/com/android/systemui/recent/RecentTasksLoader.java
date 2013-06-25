@@ -27,7 +27,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.provider.Settings;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Process;
@@ -51,8 +50,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
     private static final int DISPLAY_TASKS = 20;
     private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
-    private static final int DISPLAY_TASKS_LIMITED = 7;
-    
+
     private Context mContext;
     private RecentsPanelView mRecentsPanel;
 
@@ -433,7 +431,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
             protected Void doInBackground(Void... params) {
                 // We load in two stages: first, we update progress with just the first screenful
                 // of items. Then, we update with the rest of the items
-                final int tasksLimit = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.RECENTS_TASKS_LIMIT, 0) == 1) ? DISPLAY_TASKS_LIMITED : MAX_TASKS;
                 final int origPri = Process.getThreadPriority(Process.myTid());
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 final PackageManager pm = mContext.getPackageManager();
@@ -441,7 +438,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
                 final List<ActivityManager.RecentTaskInfo> recentTasks =
-                        am.getRecentTasks(tasksLimit, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+                        am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
                 int numTasks = recentTasks.size();
                 ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN)
                         .addCategory(Intent.CATEGORY_HOME).resolveActivityInfo(pm, 0);
@@ -451,7 +448,7 @@ public class RecentTasksLoader implements View.OnTouchListener {
 
                 // skip the first task - assume it's either the home screen or the current activity.
                 final int first = 0;
-                for (int i = first, index = 0; i < numTasks && (index < tasksLimit); ++i) {
+                for (int i = first, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
                     if (isCancelled()) {
                         break;
                     }
