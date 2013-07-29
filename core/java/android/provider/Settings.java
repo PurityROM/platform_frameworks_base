@@ -2534,6 +2534,12 @@ public final class Settings {
         public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
 
         /**
+         * Weather to minimize lockscreen challenge on screen turned on
+         * @hide
+         */
+        public static final String LOCKSCREEN_MAXIMIZE_WIDGETS = "lockscreen_maximize_widgets";
+
+        /**
           * Volume keys control cursor in text fields (default is 0)
           * 0 - Disabled
           * 1 - Volume up/down moves cursor left/right
@@ -3627,12 +3633,6 @@ public final class Settings {
          */
         public static final String LOCK_BEFORE_UNLOCK =
             "lock_before_unlock";
-
-        /**
-         * Weather to minimize lockscreen challenge on screen turned on
-         * @hide
-         */
-        public static final String LOCKSCREEN_MAXIMIZE_WIDGETS = "lockscreen_maximize_widgets";
 
         /**
          * The Logging ID (a unique 64-bit value) as a hex string.
