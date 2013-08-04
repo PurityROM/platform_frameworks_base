@@ -2677,11 +2677,6 @@ public final class Settings {
         };
         
         /**
-        * @hide
-        */
-        public static final String NAVIGATION_CONTROLS = "navigation_controls";
-        
-        /**
          * Volume key controls ringtone or media sound stream
          *
          * @hide
