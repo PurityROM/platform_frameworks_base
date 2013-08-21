@@ -188,10 +188,6 @@ public class PhoneStatusBarView extends PanelBar {
         mBar.makeExpandedInvisibleSoon();
         mFadingPanel = null;
         mLastFullyOpenedPanel = null;
-        
-        if (mBar.mFullscreenView != null) {
-            mBar.removeFullscreenView();
-        }
     }
 
     @Override

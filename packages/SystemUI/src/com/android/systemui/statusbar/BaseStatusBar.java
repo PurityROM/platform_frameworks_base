@@ -31,7 +31,6 @@ import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -50,7 +49,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -66,7 +64,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -84,8 +81,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
@@ -132,9 +127,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mLayoutDirection;
     private Locale mLocale;
-    
-    public View mFullscreenView;
-    public boolean mTopIsFullscreen = false;
+
 
     /**
      * An interface for navigation key bars to allow status bars to signal which keys are
@@ -1054,7 +1047,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return parent != null && parent.indexOfChild(entry.row) == 0;
     }
 
-    public void updateNotification(final IBinder key, final StatusBarNotification notification) {
+    public void updateNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
 
         final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
@@ -1171,25 +1164,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Restart the ticker if it's still running
         if (updateTicker && isForCurrentUser) {
-            if (mTopIsFullscreen && mFullscreenView == null) {
-                showFullscreenView();
-
-                final Handler handler = new Handler();
-                final Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    public void run() {
-                        handler.post(new Runnable() {
-                            public void run() {
-                                haltTicker();
-                                tick(key, notification, false);
-                            }
-                        });
-                    }
-                }, 250);
-            } else {
-                haltTicker();
-                tick(key, notification, false);
-            }
+            haltTicker();
+            tick(key, notification, false);
         }
 
         // Recalculate the position of the sliding windows and the titles.
@@ -1250,30 +1226,5 @@ public abstract class BaseStatusBar extends SystemUI implements
         for (NavigationBarCallback callback : mNavigationCallbacks) {
             callback.setDisabledFlags(disabledFlags);
         }
-    }
-    
-    public void showFullscreenView() {
-        if (mFullscreenView != null) {
-            return;
-        }
-        
-        mFullscreenView = new View(mContext);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.height = 1;
-        lp.width = 1;
-        lp.gravity = Gravity.TOP;
-        lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-        lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        mWindowManager.addView(mFullscreenView, lp);
-    }
-    
-    public void removeFullscreenView() {
-        try {
-            mWindowManager.removeView(mFullscreenView);
-        } catch (Exception e) {
-        }
-        mFullscreenView = null;
     }
 }
