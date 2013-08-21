@@ -323,8 +323,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_AUTO_UNHIDE), false, this);
             update();
         }
 
@@ -340,8 +338,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
             mBrightnessControl = !autoBrightness && Settings.System.getInt(
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
-            mStatusBarAutoUnhide = Settings.System.getInt(
-                    resolver, Settings.System.STATUS_BAR_AUTO_UNHIDE, 0) == 1;
         }
     }
 
@@ -1002,7 +998,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             // show the ticker if there isn't an intruder too
             if (mCurrentlyIntrudingNotification == null) {
-                if (mStatusBarAutoUnhide && mTopIsFullscreen && mFullscreenView == null) {
+                if (mTopIsFullscreen && mFullscreenView == null) {
                     showFullscreenView();
 
                     final Handler handler = new Handler();

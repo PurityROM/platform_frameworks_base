@@ -135,7 +135,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     
     public View mFullscreenView;
     public boolean mTopIsFullscreen = false;
-    public boolean mStatusBarAutoUnhide = false;
 
     /**
      * An interface for navigation key bars to allow status bars to signal which keys are
@@ -1172,7 +1171,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Restart the ticker if it's still running
         if (updateTicker && isForCurrentUser) {
-            if (mStatusBarAutoUnhide && mTopIsFullscreen && mFullscreenView == null) {
+            if (mTopIsFullscreen && mFullscreenView == null) {
                 showFullscreenView();
 
                 final Handler handler = new Handler();
