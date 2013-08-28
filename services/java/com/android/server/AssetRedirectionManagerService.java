@@ -107,7 +107,7 @@ public class AssetRedirectionManagerService extends IAssetRedirectionManager.Stu
             PackageInfo pi = getPackageInfo(mContext, key.targetPackageName);
             if (pi == null || pi.applicationInfo == null ||
                     assets.addAssetPath(pi.applicationInfo.publicSourceDir) == 0) {
-                Log.w(TAG, "Unable to attach target package assets for " + key.targetPackageName);
+                //Log.w(TAG, "Unable to attach target package assets for " + key.targetPackageName);
                 return null;
             }
         }
@@ -115,7 +115,7 @@ public class AssetRedirectionManagerService extends IAssetRedirectionManager.Stu
         PackageInfo pi = getPackageInfo(mContext, key.themePackageName);
         if (pi == null || pi.applicationInfo == null || pi.themeInfos == null ||
                 assets.addAssetPath(pi.applicationInfo.publicSourceDir) == 0) {
-            Log.w(TAG, "Unable to attach theme package assets from " + key.themePackageName);
+            //Log.w(TAG, "Unable to attach theme package assets from " + key.themePackageName);
             return null;
         }
 
@@ -193,7 +193,7 @@ public class AssetRedirectionManagerService extends IAssetRedirectionManager.Stu
             PackageInfo pi = getPackageInfo(context, packageName);
             if (pi == null || pi.applicationInfo == null ||
                     assets.addAssetPath(pi.applicationInfo.publicSourceDir) == 0) {
-                Log.w(TAG, "Unable to get resources for package " + packageName);
+                //Log.w(TAG, "Unable to get resources for package " + packageName);
                 return null;
             }
         }
@@ -414,12 +414,12 @@ public class AssetRedirectionManagerService extends IAssetRedirectionManager.Stu
             }
             int fromIdent = mResources.getIdentifier(fromName, null, mTargetPackageName);
             if (fromIdent == 0) {
-                Log.w(TAG, "No such resource found for " + mTargetPackageName + ":" + fromName);
+                //Log.w(TAG, "No such resource found for " + mTargetPackageName + ":" + fromName);
                 return;
             }
             int toIdent = mResources.getIdentifier(toName, null, mThemePackageName);
             if (toIdent == 0) {
-                Log.w(TAG, "No such resource found for " + mThemePackageName + ":" + toName);
+                //Log.w(TAG, "No such resource found for " + mThemePackageName + ":" + toName);
                 return;
             }
             mResMap.addRedirection(fromIdent, toIdent);
